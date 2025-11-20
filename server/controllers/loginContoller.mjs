@@ -34,7 +34,7 @@ export default async function loginController(req, res) {
     let [result] = await pool.query(query, [username]);
     // User not found
     if (result.length === 0) {
-      res.status(400).send("Wrong username or password");
+      res.status(401).send("Wrong username or password");
       return;
     }
     const salt = result[0].password_salt;
@@ -48,7 +48,7 @@ export default async function loginController(req, res) {
         username: username,
       };
       res.status(200).send(data);
-    } else res.status(400).send("Wrong username or password");
+    } else res.status(401).send("Wrong username or password");
     return;
   }
   // No username/password, no token
