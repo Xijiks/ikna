@@ -10,8 +10,8 @@ export default async function addCardContoller(req, res) {
     ======= Add card =======
     Expected object: {
       deckId: deckId // deckGuid: deckGuid
-      cardFront: front,
-      cardBack: back
+      cardFront: front (optional),
+      cardBack: back (optional)
     }
   */
   const token = getToken(req);
@@ -28,7 +28,7 @@ export default async function addCardContoller(req, res) {
   }
   // Checking deck name
   if (!deckId) {
-    res.status(404).send("Deck ID/GUID missing");
+    res.status(404).send("Deck ID/GUID missing or it doesn't exist");
     return;
   }
   let query = "SELECT id FROM users WHERE username = ?";
