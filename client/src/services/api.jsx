@@ -19,7 +19,6 @@ export default async function api(
       },
     },
   }).catch((error) => {
-    console.log(error.code);
     return error;
   });
   if (result) {

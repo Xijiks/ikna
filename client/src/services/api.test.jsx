@@ -11,7 +11,46 @@ let user2 = {
   username: "TestUser2_" + Math.floor(Math.random() * 1000000000),
   password: "TestPassword2_",
 };
-let decks = [];
+let decks = [
+  {
+    deckName: "First deck",
+    cards: [
+      {
+        front: "First deck - front 1",
+        back: "First deck - front 1",
+      },
+      {
+        front: "First deck - front 2",
+        back: "First deck - front 2",
+      },
+      {
+        front: "First deck - front 3",
+        back: "First deck - front 3",
+      },
+    ],
+  },
+  {
+    deckName: "Second deck",
+    cards: [
+      {
+        front: "Second deck - front 1",
+        back: "Second deck - front 1",
+      },
+      {
+        front: "Second deck - front 2",
+        back: "Second deck - front 2",
+      },
+      {
+        front: "Second deck - front 3",
+        back: "Second deck - front 3",
+      },
+    ],
+  },
+  {
+    deckName: "Third deck",
+    cards: [],
+  },
+];
 
 // ============== Authentification ==============
 
@@ -53,7 +92,6 @@ test("Authentification: Login with a wrong password", async () => {
 });
 
 test("Authentification: Login using session token", async () => {
-  console.log();
   const result = await api("post", "/login", null, user1.token);
   user1.token = result?.data?.token;
   expect(result?.status).toEqual(200); // OK
@@ -66,4 +104,129 @@ test("Authentification: Login using wrong session token", async () => {
   expect(result?.status).toEqual(401); // Unauthorized
 });
 
-// ============== Adding decks ==============
+// ============== Decks ==============
+
+test("Decks: Create a new deck", async () => {
+  // Add the first deck
+  const result1 = await api(
+    "post",
+    "/deck/add",
+    {
+      deckName: decks[0].deckName,
+    },
+    user1.token
+  );
+  console.log(result1);
+  expect(result1?.status).toEqual(200); // OK
+  // Check the deck list
+  const result2 = await api("get", "/deck/list", null, user1.token);
+  expect(result2?.data.map((item) => item.deckName)).toEqual([
+    decks[0].deckName,
+  ]);
+});
+
+test("Decks: Create multiple decks", async () => {
+  // Add the second deck
+  const result1 = await api(
+    "post",
+    "/deck/add",
+    {
+      deckName: decks[1].deckName,
+    },
+    user1.token
+  );
+  expect(result1?.status).toEqual(200); // OK
+  // Add the third deck
+  const result2 = await api(
+    "post",
+    "/deck/add",
+    {
+      deckName: decks[2].deckName,
+    },
+    user1.token
+  );
+  expect(result2?.status).toEqual(200); // OK
+  // Check the deck list
+  const result3 = await api("get", "/deck/list", null, user1.token);
+  expect(result3?.status).toEqual(200); // OK
+  expect(result3?.data.map((item) => item.deckName)).toEqual([
+    decks[0].deckName,
+    decks[1].deckName,
+    decks[2].deckName,
+  ]);
+  decks[0].guid = result3?.data[0].guid;
+  decks[1].guid = result3?.data[1].guid;
+  decks[2].guid = result3?.data[2].guid;
+});
+
+test("Decks: Update a deck", async () => {
+  // Update the second deck by ID
+  const result1 = await api(
+    "patch",
+    "/deck/update",
+    {
+      deckGuid: decks[1].guid,
+      deckName: decks[1].deckName + "_UPDATED",
+    },
+    user1.token
+  );
+  expect(result1?.status).toEqual(200); // OK
+  // Check the deck list
+  const result2 = await api("get", "/deck/list", null, user1.token);
+  expect(result2?.status).toEqual(200); // OK
+  expect(result2?.data.map((item) => item.deckName)).toEqual([
+    decks[0].deckName,
+    decks[1].deckName + "_UPDATED",
+    decks[2].deckName,
+  ]);
+});
+
+test("Decks: Update a non-existent deck", async () => {
+  // Update a deck with a wrong ID
+  const result = await api(
+    "patch",
+    "/deck/update",
+    {
+      deckGuid: "WRONG_GUID",
+      deckName: decks[1].deckName + "_UPDATED",
+    },
+    user1.token
+  );
+  expect(result?.status).toEqual(404); // Not found
+});
+
+test("Decks: Delete a deck", async () => {
+  // Delete the second deck by ID
+  const result1 = await api(
+    "delete",
+    "/deck/delete",
+    {
+      deckGuid: decks[1].guid,
+    },
+    user1.token
+  );
+  expect(result1?.status).toEqual(200); // OK
+  // Check the deck list
+  const result2 = await api("get", "/deck/list", null, user1.token);
+  expect(result2?.status).toEqual(200); // OK
+  expect(result2?.data.map((item) => item.deckName)).toEqual([
+    decks[0].deckName,
+    decks[2].deckName,
+  ]);
+});
+
+test("Decks: Update a deleted deck", async () => {
+  // Update a deck with a wrong ID
+  const result = await api(
+    "patch",
+    "/deck/update",
+    {
+      deckGuid: decks[1].guid,
+      deckName: decks[1].deckName + "_UPDATED",
+    },
+    user1.token
+  );
+  expect(result?.status).toEqual(404); // Not found
+});
+
+// ============== Cards ==============

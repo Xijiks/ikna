@@ -41,7 +41,7 @@ export default async function updateCardContoller(req, res) {
   [result] = await pool.query(query, [userId, cardId]);
   // Checking cards with the same ID
   if (result.length === 0) {
-    res.status(400).send(`Card with this ID/GUID doesn't exist`);
+    res.status(404).send(`Card with this ID/GUID doesn't exist`);
     return;
   }
   const deckId = result[0].id;

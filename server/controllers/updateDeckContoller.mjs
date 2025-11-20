@@ -39,7 +39,7 @@ export default async function updateDeckContoller(req, res) {
   [result] = await pool.query(query, [userId, deckId]);
   // Checking decks with the same ID
   if (result.length === 0) {
-    res.status(400).send(`Deck with this ID/GUID doesn't exist`);
+    res.status(404).send(`Deck with this ID/GUID doesn't exist`);
     return;
   }
   deckName = deckName ?? result[0].deck_name;
